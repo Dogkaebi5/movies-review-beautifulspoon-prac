@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="IT'z 믿지" />
+    <meta property="og:description" content="응원글을 남겨보세요" />
+    <meta property="og:image" content="https://lv2-cdn.azureedge.net/itzy/d780eed0d8ae4a5eb334746b87f9fece-ITZY-CHESHIRE-teaser-%EB%8B%A8%EC%B2%B4.jpg" />
+    <link rel="icon" href="https://lv2-cdn.azureedge.net/itzy/949bcb2cba1349589c7f329ac6c656fc-WEB-MAINLOGO-w.png">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"></script>
+
+    <title>IT'z 팬응원</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@200;300;400;500;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * {font-family: 'Do Hyeon', sans-serif;}
+
+        .profile {
+            position: fixed;
+            bottom: 0;
+            right: 0;
+            margin: 20px;
+            width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .profile img{max-width: 80px;}
+        .profile p{font-size: 0.8rem}
+
+        @media (max-width: 740px){
+            .profile {
+                position: static;
+                background-color: #007A37;
+                margin: 0;
+                width: 100%;
+                color: snow;
+            }
+        }
+
+        .mypic {
+            background-image: linear-gradient( rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 1) ), url("https://lv2-cdn.azureedge.net/itzy/d780eed0d8ae4a5eb334746b87f9fece-ITZY-CHESHIRE-teaser-%EB%8B%A8%EC%B2%B4.jpg");
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            height: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: snow;
+        }
+        .mypic p{
+            display: flex;
+            align-items: end;
+        }
+        #temp{font-size: 1.5rem;}
+        #temp_icon{width: 40px;}
+
+        .wrap{
+            margin-top: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .play{
+            max-width: 560px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .play ul{
+            padding: 0;
+            display: flex;
+            transition: 0.5s;
+        }
+        .play ul li{
+            list-style: none;
+
+        }
+        .arrow{
+            margin: 0 auto;
+        }
+        .arrow a{
+            padding: 10px;
+            margin: 5px;
+        }
+
+        .mypost {
+            width: 95%;
+            max-width: 500px;
+            margin: 20px auto 20px auto;
+            box-shadow: 0px 0px 3px 0px black;
+            padding: 20px;
+        }
+
+        .mypost > button {
+            margin-top: 15px;
+        }
+
+        .mycards {
+            width: 95%;
+            max-width: 500px;
+            margin: auto;
+        }
+
+        .mycards > .card {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+        .time{
+            font-size: 0.8rem;
+            color: grey;
+        }
+        .pagenav {
+            display: flex;
+            justify-content: center;
+        }
+
+    </style>
+    <script>
+        $(document).ready(function(){
+            set_temp()
+            show_comment()
+        });
+
+        function set_temp(){
+            $.ajax({
+                type: "GET",
+                url: "http://spartacodingclub.shop/sparta_api/weather/seoul",
+                data: {},
+                success: function (response) {
+                    $('#temp').text(response['temp']);
+                    $('#temp_icon').attr("src",response['icon']);
+                }
+            })
+        }
+
+        function save_comment(){
+            let name = $('#name').val();
+            let comment = $('#comment').val();
+            let today = new Date();
+            let date = today.toLocaleDateString();
+            if (name && comment){
+                      $.ajax({
+                            type: 'POST',
+                            url: '/homework',
+                            data: {name_give: name, comment_give:comment, date_give:date},
+                            success: function (response) {
+                                alert(response['msg'])
+                                window.location.reload()
+                            }
+                      })
+            }else {alert("내용을 입력하세요")}
+        }
+
+        function pagination(clicked_id){
+            let comment_num = (clicked_id-1)*5
+            show_comment(comment_num);
+        }
+
+        function show_comment(comment_num=0){
+            $.ajax({
+                type: "GET",
+                url: "/homework",
+                data: {},
+                success: function (response) {
+                    let rows = response['fans']; //fans 받아서 저장
+
+                    $('#pagination').empty();
+                    //최대 페이지 계산 후 pagination 출력
+                    let max_page = Math.ceil(rows.length/5);
+                    for (let i = 0; i < max_page; i++){
+                        let page_num = i+1;
+                        let temp_page = `<li class="page-item">
+                                            <a class="page-link" id="${page_num}" onclick="pagination(this.id)">${page_num}</a>
+                                        </li>`
+                        $('#pagination').append(temp_page)
+                    }
+
+                    $('#comment-list').empty();
+                    // 페이지 네비 콘텐츠 출력
+                    for (let i=0; i<5; i++){
+                        let start = rows.length -1
+                        let page_start = start - comment_num;
+                        let num = page_start - i;
+
+                        let name = rows[num]['name'];
+                        let comment = rows[num]['comment'];
+                        let date = rows[num]['date']
+
+                        let temp_html = `<div class="card">
+                                            <div class="card-body">
+                                                <blockquote class="blockquote mb-0">
+                                                    <p>${comment}</p>
+                                                    <footer class="blockquote-footer">${name}</footer>
+                                                    <p class="time">${date}</p>
+                                                </blockquote>
+                                            </div>
+                                        </div>
+                        `
+                        $('#comment-list').append(temp_html)
+                    }
+                    window.onload = function (){
+                        const wrap = document.querySelector('.wrap');
+                        const slider = wrap.querySelector('.slider');
+                        const moveBtn = wrap.querySelector('.arrow');
+
+                        const liWidth = 560;
+
+                        let lis = slider.childElementCount;
+                        console.log(lis);
+                        let current_idx= 0;
+                        let translate= 0;
+                        moveBtn.addEventListener('click', move_slide);
+
+                        function move_slide(event){
+                            if (event.target.className === 'next'){
+                                if (current_idx < lis-1){
+                                    current_idx +=1;
+                                    translate = -(liWidth * current_idx);
+                                    slider.style.transform = `translate(${translate}px)`;
+                                    console.log(current_idx);
+                                } else {
+                                    current_idx = 0;
+                                    slider.style.transform = `translate(0px)`;
+                                    console.log(current_idx);
+                                }
+                            } else if (event.target.className === 'prev'){
+                                if (current_idx > 0) {
+                                    current_idx -= 1;
+                                    translate = -(liWidth * current_idx);
+                                    slider.style.transform = `translate(${translate}px)`;
+                                    console.log(current_idx);
+                                } else {
+                                    current_idx = lis-1;
+                                    translate = -(liWidth * current_idx);
+                                    slider.style.transform = `translate(${translate}px)`;
+                                    console.log(current_idx);
+                                }
+                            }
+                        }
+                    }
+
+                    //전체 콘텐츠 꺼꾸로 출력
+                    // for (let i = rows.length - 1; i > -1; i--){
+                    //
+                    //     let name = rows[i]['name'];
+                    //     let comment = rows[i]['comment'];
+                    //     let date = rows[i]['date']
+                    //
+                    //     let temp_html = `<div class="card">
+                    //                         <div class="card-body">
+                    //                             <blockquote class="blockquote mb-0">
+                    //                                 <p>${comment}</p>
+                    //                                 <footer class="blockquote-footer">${name}</footer>
+                    //                                 <p class="time">${date}</p>
+                    //                             </blockquote>
+                    //                         </div>
+                    //                     </div>
+                    //     `
+                    //     $('#comment-list').append(temp_html)
+                    // }
+                }
+            })
+        }
+    </script>
+</head>
+<body>
+    <div class="mypic">
+        <h1>ITZY 팬명록</h1>
+        <p>현재기온:&nbsp<span id="temp">0</span> 도<span><img id="temp_icon" src="#"></span></p>
+    </div>
+    <div class="wrap">
+        <div class="play">
+            <ul class="slider">
+                <li><iframe width="560" height="315" src="https://www.youtube.com/embed/zugAhfd2r0g" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>
+                <li><iframe width="560" height="315" src="https://www.youtube.com/embed/MjCZfZfucEc" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>
+                <li><iframe width="560" height="315" src="https://www.youtube.com/embed/_ysomCGaZLw" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>
+                <li><iframe width="560" height="315" src="https://www.youtube.com/embed/wTowEKjDGkU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>
+                <li><iframe width="560" height="315" src="https://www.youtube.com/embed/zndvqTc4P9I" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>
+                <li><iframe width="560" height="315" src="https://www.youtube.com/embed/pNfTK39k55U" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></li>
+            </ul>
+            <div class="arrow">
+                <a href="#" class="prev">&lt PREV</a>
+                <a href="#" class="next">NEXT &gt</a>
+            </div>
+        </div>
+    </div>
+    <div class="mypost">
+        <div class="form-floating mb-3">
+            <input type="text" class="form-control" id="name" placeholder="url" maxlength="10">
+            <label for="floatingInput">닉네임</label>
+        </div>
+        <div class="form-floating">
+        <textarea class="form-control" placeholder="Leave a comment here" id="comment"
+                  style="height: 100px" maxlength="50"></textarea>
+            <label for="floatingTextarea2">응원댓글</label>
+        </div>
+        <button onclick="save_comment()" type="button" class="btn btn-dark">응원 남기기</button>
+    </div>
+    <div class="mycards" id="comment-list">
+    </div>
+    <nav aria-label="Page navigation example" class="pagenav">
+        <ul class="pagination" id="pagination">
+        </ul>
+    </nav>
+    <div class="profile">
+        <a href="https://recondite-lancer-219.notion.site/24c3c3a977ed4a1ea0c427d9fba4ddb8">
+            <img src="https://recondite-lancer-219.notion.site/image/https%3A%2F%2Fs3-us-west-2.amazonaws.com%2Fsecure.notion-static.com%2Ffbf1851f-88b9-432e-8467-8d09a028041a%2FIMG_20221201_110534_026.png?table=block&id=ab0d811d-3ccb-4057-a486-1379030eaf28&spaceId=d32809fe-9326-4d08-a405-6f5742eacc33&width=1060&userId=&cache=v2" alt="">
+        </a>
+        <p>by Dogkaebi</p>
+    </div>
+</body>
+</html>
