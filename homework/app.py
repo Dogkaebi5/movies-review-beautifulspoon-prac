@@ -2,7 +2,7 @@ from flask import Flask, render_template, request, jsonify
 app = Flask(__name__)
 
 from pymongo import MongoClient
-client = MongoClient('mongodb+srv://st9dog:****@cluster0.csxk3sv.mongodb.net/?retryWrites=true&w=majority')
+client = MongoClient('mongodb+srv://st9dog:ghkrdls@cluster0.csxk3sv.mongodb.net/?retryWrites=true&w=majority')
 db = client.dbsparta
 
 @app.route('/')
@@ -11,9 +11,13 @@ def home():
 
 @app.route("/homework", methods=["POST"])
 def homework_post():
-    name_receive = request.form['name_give']
-    comment_receive = request.form['comment_give']
-    date_receive = request.form['date_give']
+    params = request.get_json()
+    name_receive = params['name_give']
+    comment_receive = params['comment_give']
+    date_receive = params['date_give']
+    # name_receive = request.form['name_give']
+    # comment_receive = request.form['comment_give']
+    # date_receive = request.form['date_give']
 
     doc = {
         'name': name_receive,
